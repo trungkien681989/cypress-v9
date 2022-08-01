@@ -26,7 +26,8 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-import { elementStore } from './element-store';
+import * as elements from './element-store';
+let LOCAL_STORAGE_MEMORY = {};
 
 Cypress.Commands.overwrite('type', (originalFn, element, text, options) => {
   if (options && options.sensitive) {
@@ -134,8 +135,40 @@ Cypress.Commands.add('clickSpan',
  * @returns Chainable
  */
 Cypress.Commands.add('login', (email, password) => {
-  cy.get(elementStore['Email Text']).should('be.visible').clear().type(email, { log: true });
-  cy.get(elementStore['Password Text']).should('be.visible').clear().type(password, { sensitive: true });
-  cy.get(elementStore['Login Button']).should('be.enabled').click();
-  cy.get(elementStore['Login Button']).should('not.exist');
+  cy.get(elements.emailText).should('be.visible').clear().type(email, { log: true });
+  cy.get(elements.passwordText).should('be.visible').clear().type(password, { sensitive: true });
+  cy.get(elements.loginButton).should('be.enabled').click();
+  cy.get(elements.loginButton).should('not.exist');
+});
+
+/**
+ * @memberOf cy
+ * @method saveLocalStorageCache
+ * @returns Chainable
+ */
+Cypress.Commands.add('saveLocalStorageCache', () => {
+  Object.keys(localStorage).forEach(key => {
+    LOCAL_STORAGE_MEMORY[key] = localStorage[key];
+  });
+});
+
+/**
+ * @memberOf cy
+ * @method restoreLocalStorageCache
+ * @returns Chainable
+ */
+Cypress.Commands.add('restoreLocalStorageCache', () => {
+  Object.keys(LOCAL_STORAGE_MEMORY).forEach(key => {
+    localStorage.setItem(key, LOCAL_STORAGE_MEMORY[key]);
+  });
+});
+
+/**
+ * @memberOf cy
+ * @method clearLocalStorageCache
+ * @returns Chainable
+ */
+Cypress.Commands.add("clearLocalStorageCache", () => {
+  localStorage.clear();
+  LOCAL_STORAGE_MEMORY = {};
 });

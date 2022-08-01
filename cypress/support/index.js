@@ -32,6 +32,10 @@ require('./commands');
 // Support Xpath
 require('cypress-xpath');
 
+Cypress.Cookies.defaults({
+  preserve: ['token'],
+});
+
 if (Cypress.config('hideXHR')) {
   // Hide fetch/XHR requests
   const app = window.top;
