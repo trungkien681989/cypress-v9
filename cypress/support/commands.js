@@ -1,3 +1,5 @@
+/* eslint-disable cypress/no-force */
+/* eslint-disable no-param-reassign */
 // ***********************************************
 // This example commands.js shows you how to
 // create various custom commands and overwrite
@@ -24,95 +26,116 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-import dayjs from "dayjs"
+import { elementStore } from './element-store';
 
-/**
-* @memberOf cy
-* @method fillInformation
-* @param {string} computerName
-* @param {string} introducedDate
-* @param {string} discontinueDate
-* @param {string} company
-*/
-
-Cypress.Commands.add('fillInformation',
-    (computerName, introducedDate, discontinueDate, company) => {
-        cy.get('#name').should("be.visible").type(computerName)
-        cy.get('#introduced').should("be.visible").type(introducedDate)
-        cy.get('#discontinued').should("be.visible").type(discontinueDate)
-        cy.get('#company').should("be.visible").select(company) 
+Cypress.Commands.overwrite('type', (originalFn, element, text, options) => {
+  if (options && options.sensitive) {
+    // turn off original log
+    options.log = false;
+    // create own log w/ masked message
+    Cypress.log({
+      $el: element,
+      name: 'type',
+      message: '*'.repeat(text.length),
+    });
+  }
+  return originalFn(element, text, options);
 });
 
 /**
-* @memberOf cy
-* @method isComputerDisplaySuccessfully
-* @param {obj} computerObj
-*/
-
-Cypress.Commands.add('isComputerDisplaySuccessfully',
-    (computerObj) => {
-    let computerName = computerObj.computerName
-    let introducedDate = computerObj.introducedDate
-    let discontinuedDate = computerObj.discontinuedDate
-    let company = computerObj.company
-  
-    if(computerName !== undefined){
-        cy.contains(computerName).should("be.visible")
-    }
-    if(introducedDate !== undefined){
-        let displayIntroducedDate = dayjs(introducedDate).format("DD MMM YYYY")
-        cy.contains(displayIntroducedDate).should("be.visible")         
-    }
-    if(discontinuedDate !== undefined){
-        let displaydiscontinuedDate= dayjs(discontinuedDate).format("DD MMM YYYY")
-        cy.contains(displaydiscontinuedDate).should("be.visible")
-    }
-    if(company !== undefined){
-        cy.contains(company).should("be.visible")
-    }
-});
+ * @memberOf cy
+ * @method clickButton
+ * @param {string} label
+ * @returns Chainable
+ */
+Cypress.Commands.add('clickButton',
+  (label) => {
+    cy.contains(label)
+      .should('exist');
+    cy.get('button')
+      .contains(label)
+      .should('be.visible')
+      .scrollIntoView()
+      .click({ waitForAnimations: true, force: true });
+  });
 
 /**
-* @memberOf cy
-* @method updateInformation
-* @param {obj} computerObj
-*/
-Cypress.Commands.add('updateInformation',
-    (computerObj) => {
-    let computerName = computerObj.computerName
-    let introducedDate = computerObj.introducedDate
-    let discontinuedDate = computerObj.discontinuedDate
-    let company = computerObj.company
-  
-    if(computerName !== undefined){
-        cy.get('#name').clear()
-                                    .should("be.visible")
-                                    .type(computerName)
-    }
-    if(introducedDate !== undefined){
-        cy.get('#introduced').clear()
-                                    .should("be.visible")
-                                    .type(introducedDate)           
-    }
-    if(discontinuedDate !== undefined){
-        cy.get('#discontinued').clear()
-                                    .should("be.visible")
-                                    .type(discontinuedDate)
-    }
-    if(company !== undefined){
-        cy.get('#company').should("be.visible").select(company)
-    }
-    cy.contains("Save this computer").click()
-});
+ * @memberOf cy
+ * @method clickLinkSameWindow
+ * @param {string} label
+ * @returns Chainable
+ */
+Cypress.Commands.add('clickLinkSameWindow',
+  (label) => {
+    cy.contains(label)
+      .should('exist');
+    cy.get('a')
+      .contains(label)
+      .should('be.visible')
+      .scrollIntoView()
+      .invoke('removeAttr', 'target')
+      .invoke('removeAttr', 'onclick')
+      .click({ waitForAnimations: true, force: true });
+  });
 
 /**
-* @memberOf cy
-* @method filterComputer
-* @param {string} computerName
-*/
+ * @memberOf cy
+ * @method clickLink
+ * @param {string} label
+ * @returns Chainable
+ */
+Cypress.Commands.add('clickLink',
+  (label) => {
+    cy.contains(label)
+      .should('exist');
+    cy.get('a')
+      .contains(label)
+      .should('exist')
+      .scrollIntoView()
+      .click({ waitForAnimations: true, force: true });
+  });
 
-Cypress.Commands.add('filterComputer',
-    (computerName) => {
-        cy.get('#searchbox').should("be.visible").type(computerName)
-        cy.get('#searchsubmit').should("be.visible").click()
+/**
+ * @memberOf cy
+ * @method clickLinkButton
+ * @param {string} label
+ * @returns Chainable
+ */
+Cypress.Commands.add('clickLinkButton',
+  (label) => {
+    cy.get(`button[aria-label="${label}"]`)
+      .should('exist')
+      .scrollIntoView()
+      .click({ waitForAnimations: true, force: true });
+  });
+
+/**
+ * @memberOf cy
+ * @method clickSpan
+ * @param {string} label
+ * @returns Chainable
+ */
+Cypress.Commands.add('clickSpan',
+  (label) => {
+    cy.contains(label)
+      .should('exist');
+    cy.get('span')
+      .contains(label)
+      .should('exist')
+      .scrollIntoView()
+      .click({ waitForAnimations: true, force: true });
+  });
+
+/**
+ * @memberOf cy
+ * @method login
+ * @param {string} email
+ * @param {string} password
+ * @returns Chainable
+ */
+Cypress.Commands.add('login', (email, password) => {
+  cy.get(elementStore['Email Text']).should('be.visible').clear().type(email, { log: true });
+  cy.get(elementStore['Password Text']).should('be.visible').clear().type(password, { sensitive: true });
+  cy.get(elementStore['Login Button']).should('be.enabled').click();
+  cy.get(elementStore['Login Button']).should('not.exist');
 });
