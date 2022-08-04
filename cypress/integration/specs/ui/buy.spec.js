@@ -1,4 +1,4 @@
-import * as elements from '../../support/element-store';
+import * as elements from '../../../support/element-store';
 
 let bearerToken;
 let basketId;
@@ -51,11 +51,7 @@ describe('Buying one product', () => {
   });
 
   it('Open the OWASP Juice Shop home page', () => {
-    cy.visit(Cypress.env('baseURL'));
-    expect(cy.title().should('equal', 'OWASP Juice Shop'));
-    cy.get(elements.closeWelcomeBannerButton).should('be.visible').click();
-    cy.get(elements.dismissCookieMessage).should('be.visible').click();
-    cy.get(elements.itemsPerPage).should('exist');
+    cy.openOWASPJuiceShop();
   });
 
   it('Login with valid account', () => {
