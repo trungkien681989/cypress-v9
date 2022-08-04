@@ -45,6 +45,27 @@ Cypress.Commands.overwrite('type', (originalFn, element, text, options) => {
 
 /**
  * @memberOf cy
+ * @method setValue
+ * @param {string} keyName
+ * @param {string} keyValue
+ * @returns Chainable
+ */
+Cypress.Commands.add('setValue', (keyName, keyValue) => {
+  cy.task('setValue', { key: keyName, value: keyValue });
+});
+
+/**
+ * @memberOf cy
+ * @method getValue
+ * @param {string} keyName
+ * @returns Chainable
+ */
+Cypress.Commands.add('getValue', (keyName) => {
+  cy.task('getValue', { key: keyName }).then((value) => value);
+});
+
+/**
+ * @memberOf cy
  * @method clickButton
  * @param {string} label
  * @returns Chainable
@@ -139,6 +160,35 @@ Cypress.Commands.add('login', (email, password) => {
   cy.get(elements.passwordText).should('be.visible').clear().type(password, { sensitive: true });
   cy.get(elements.loginButton).should('be.enabled').click();
   cy.get(elements.loginButton).should('not.exist');
+});
+
+/**
+ * @memberOf cy
+ * @method authenticate
+ * @returns Chainable
+ */
+Cypress.Commands.add('authenticate', () => {
+  cy.fixture('user').then((users) => {
+    cy.request({
+      method: 'POST',
+      url: `${Cypress.env('baseURL')}/rest/user/login`,
+      headers: { 'content-type': 'application/json' },
+      body: { email: `${users.valid.email}`, password: `${users.valid.password}` },
+    }).then((response) => response.body.authentication);
+  });
+});
+
+/**
+ * @memberOf cy
+ * @method openOWASPJuiceShop
+ * @returns Chainable
+ */
+Cypress.Commands.add('openOWASPJuiceShop', () => {
+  cy.visit(Cypress.env('baseURL'));
+  expect(cy.title().should('equal', 'OWASP Juice Shop'));
+  cy.get(elements.closeWelcomeBannerButton).should('be.visible').click();
+  cy.get(elements.dismissCookieMessage).should('be.visible').click();
+  cy.get(elements.itemsPerPage).should('exist');
 });
 
 /**

@@ -9,8 +9,12 @@ let firstItemBasketId;
 let addressId;
 
 describe('Buying one product', () => {
-  before(function() {
+  before(() => {
     cy.clearLocalStorageCache();
+    cy.authenticate().then((authentication) => {
+      bearerToken = authentication.token;
+      basketId = authentication.bid;
+    });
   });
 
   beforeEach(() => {
@@ -19,20 +23,6 @@ describe('Buying one product', () => {
 
   afterEach(() => {
     cy.saveLocalStorageCache();
-  });
-
-  it('Login by api', () => {
-    cy.fixture('user').then((users) => {
-      cy.request({
-        method: 'POST',
-        url: `${Cypress.env('baseURL')}/rest/user/login`,
-        headers: {'content-type': 'application/json'},
-        body: {email: `${users.valid.email}`, password: `${users.valid.password}`},
-      }).then((response) => {
-        bearerToken = response.body.authentication.token;
-        basketId = response.body.authentication.bid;
-      });
-    });
   });
 
   it('Get items in basket', () => {
