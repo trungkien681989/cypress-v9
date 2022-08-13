@@ -1,19 +1,14 @@
 import * as elements from '../../../support/element-store';
 
-let bearerToken;
-let basketId;
-let products;
 let firstProductName;
 let firstProductPrice;
-let firstItemBasketId;
-let addressId;
 
 describe('Buying one product', () => {
   before(() => {
     cy.clearLocalStorageCache();
     cy.authenticate().then((authentication) => {
-      bearerToken = authentication.token;
-      basketId = authentication.bid;
+      cy.cleanupProducts(authentication.bid, authentication.token);
+      cy.cleanupAddress(authentication.token);
     });
   });
 
@@ -23,31 +18,6 @@ describe('Buying one product', () => {
 
   afterEach(() => {
     cy.saveLocalStorageCache();
-  });
-
-  it('Get items in basket', () => {
-    cy.request({
-      method: 'GET',
-      url: `${Cypress.env('baseURL')}/rest/basket/${basketId}`,
-      headers: {Authorization: `Bearer ${bearerToken}`},
-    }).then((getResponse) => {
-      expect(getResponse).property('status').to.equal(200);
-      products = getResponse.body.data.Products;
-    });
-  });
-
-  it('Delete items in basket', () => {
-    // eslint-disable-next-line no-plusplus
-    for(let i = 0; i < products.length; i++) {
-      cy.request({
-        method: 'DELETE',
-        url: `${Cypress.env('baseURL')}/api/BasketItems/${products[i].BasketItem.id}`,
-        headers: {Authorization: `Bearer ${bearerToken}`},
-      }).then((deleteResponse) => {
-        expect(deleteResponse).property('status').to.equal(200);
-        expect(deleteResponse.body.status).to.equal('success');
-      });
-    }
   });
 
   it('Open the OWASP Juice Shop home page', () => {
@@ -79,7 +49,6 @@ describe('Buying one product', () => {
     cy.wait('@basket').then((interception) => {
       expect(interception.response.body.status).to.include('success');
       expect(interception.response.body.data.Products.length).to.eq(1);
-      firstItemBasketId = interception.response.body.data.Products[0].BasketItem.id;
     });
   });
 
@@ -127,7 +96,6 @@ describe('Buying one product', () => {
     cy.wait('@createNewAddress').then((interception) => {
       expect(interception.response.statusCode).to.equals(201);
       expect(interception.response.body.status).to.include('success');
-      addressId = interception.response.body.data.id;
     });
   });
 
@@ -142,27 +110,6 @@ describe('Buying one product', () => {
       cy.get('app-address mat-row').first().find('mat-cell').eq(3)
         .invoke('text')
         .should('include', address.country);
-    });
-  });
-
-  it('Clean up data', () => {
-    // Delete address
-    cy.request({
-      method: 'DELETE',
-      url: `${Cypress.env('baseURL')}/api/Addresss/${addressId}`,
-      headers: {Authorization: `Bearer ${bearerToken}`},
-    }).then((response) => {
-      expect(response).property('status').to.equal(200);
-      expect(response.body.status).to.equal('success');
-    });
-    // Delete items
-    cy.request({
-      method: 'DELETE',
-      url: `${Cypress.env('baseURL')}/api/BasketItems/${firstItemBasketId}`,
-      headers: {Authorization: `Bearer ${bearerToken}`},
-    }).then((response) => {
-      expect(response).property('status').to.equal(200);
-      expect(response.body.status).to.equal('success');
     });
   });
 });

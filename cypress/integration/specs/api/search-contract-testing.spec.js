@@ -1,21 +1,20 @@
 import Ajv from 'ajv';
 
-const ajv = new Ajv({allErrors: true});
+const ajv = new Ajv({ allErrors: true });
 let bearerToken;
-let basketId;
 let responseBody;
 
 function makeRequest(method, endpoint, statusCode) {
   cy.request({
-    method: method,
+    method,
     url: `${Cypress.env('baseURL')}/${endpoint}`,
     headers: {
       Authorization: `Bearer ${bearerToken}`,
     },
     failOnStatusCode: false,
-  }).then((response) => {
-    expect(response).property('status').to.equal(statusCode);
-    responseBody = response.body;
+  }).should(({ status, body }) => {
+    expect(status).to.equal(statusCode);
+    responseBody = body;
   });
 }
 
@@ -24,7 +23,6 @@ describe('Contract testing for /search endpoint', () => {
     cy.clearLocalStorageCache();
     cy.authenticate().then((authentication) => {
       bearerToken = authentication.token;
-      basketId = authentication.bid;
     });
   });
 
@@ -44,7 +42,7 @@ describe('Contract testing for /search endpoint', () => {
     cy.fixture('schema/rest-products-search').then((schema) => {
       const validate = ajv.compile(schema);
       const valid = validate(responseBody);
-      if(!valid) {
+      if (!valid) {
         cy.log(validate.errors).then(() => {
           throw new Error('Wrong Schema. Please double check recent commits.');
         });

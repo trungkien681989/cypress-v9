@@ -27,6 +27,7 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 import * as elements from './element-store';
+
 let LOCAL_STORAGE_MEMORY = {};
 
 Cypress.Commands.overwrite('type', (originalFn, element, text, options) => {
@@ -180,6 +181,68 @@ Cypress.Commands.add('authenticate', () => {
 
 /**
  * @memberOf cy
+ * @method cleanupProducts
+ * @param {string} basketId
+ * @param {string} token
+ * @returns Chainable
+ */
+Cypress.Commands.add('cleanupProducts', (basketId, token) => {
+  // Get items in basket
+  cy.request({
+    method: 'GET',
+    url: `${Cypress.env('baseURL')}/rest/basket/${basketId}`,
+    headers: { Authorization: `Bearer ${token}` },
+  }).should(({ status, body }) => {
+    expect(status).to.equal(200);
+    const { Products } = body.data;
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < Products.length; i++) {
+      // Delete item
+      cy.request({
+        method: 'DELETE',
+        url: `${Cypress.env('baseURL')}/api/BasketItems/${Products[i].BasketItem.id}`,
+        headers: { Authorization: `Bearer ${token}` },
+        // eslint-disable-next-line no-shadow
+      }).should(({ status, body }) => {
+        expect(status).to.equal(200);
+        expect(body.status).to.equal('success');
+      });
+    }
+  });
+});
+
+/**
+ * @memberOf cy
+ * @method cleanupAddress
+ * @param {string} token
+ * @returns Chainable
+ */
+Cypress.Commands.add('cleanupAddress', (token) => {
+  // Get all address
+  cy.request({
+    method: 'GET',
+    url: `${Cypress.env('baseURL')}/api/Addresss`,
+    headers: { Authorization: `Bearer ${token}` },
+  }).should(({ status, body }) => {
+    expect(status).to.equal(200);
+    const { data } = body;
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < data.length; i++) {
+      // Delete address
+      cy.request({
+        method: 'DELETE',
+        url: `${Cypress.env('baseURL')}/api/Addresss/${data[i].id}`,
+        headers: { Authorization: `Bearer ${token}` },
+      }).then((response) => {
+        expect(response).property('status').to.equal(200);
+        expect(response.body.status).to.equal('success');
+      });
+    }
+  });
+});
+
+/**
+ * @memberOf cy
  * @method openOWASPJuiceShop
  * @returns Chainable
  */
@@ -197,7 +260,7 @@ Cypress.Commands.add('openOWASPJuiceShop', () => {
  * @returns Chainable
  */
 Cypress.Commands.add('saveLocalStorageCache', () => {
-  Object.keys(localStorage).forEach(key => {
+  Object.keys(localStorage).forEach((key) => {
     LOCAL_STORAGE_MEMORY[key] = localStorage[key];
   });
 });
@@ -208,7 +271,7 @@ Cypress.Commands.add('saveLocalStorageCache', () => {
  * @returns Chainable
  */
 Cypress.Commands.add('restoreLocalStorageCache', () => {
-  Object.keys(LOCAL_STORAGE_MEMORY).forEach(key => {
+  Object.keys(LOCAL_STORAGE_MEMORY).forEach((key) => {
     localStorage.setItem(key, LOCAL_STORAGE_MEMORY[key]);
   });
 });
@@ -218,7 +281,7 @@ Cypress.Commands.add('restoreLocalStorageCache', () => {
  * @method clearLocalStorageCache
  * @returns Chainable
  */
-Cypress.Commands.add("clearLocalStorageCache", () => {
+Cypress.Commands.add('clearLocalStorageCache', () => {
   localStorage.clear();
   LOCAL_STORAGE_MEMORY = {};
 });
