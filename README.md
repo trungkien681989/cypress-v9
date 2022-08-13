@@ -40,7 +40,6 @@ The steps below will take you all the way through setup and running the tests. Y
 **If you get stuck, here is more help:**
 
 * [Install Cypress](https://docs.cypress.io/guides/getting-started/installing-cypress)
-* [Setup cypress-cucumber-preprocessor](https://www.npmjs.com/package/cypress-cucumber-preprocessor)
 * [Gitter Channel](https://gitter.im/cypress-io/cypress)
 * [Cypress Docs](https://on.cypress.io)
 * [Cypress CLI Tool Docs](https://docs.cypress.io/guides/guides/command-line)
