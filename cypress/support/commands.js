@@ -67,20 +67,49 @@ Cypress.Commands.add('getValue', (keyName) => {
 
 /**
  * @memberOf cy
+ * @method clickElement
+ * @param {string} selector
+ * @returns Chainable
+ */
+Cypress.Commands.add('clickElement', (selector) => {
+  cy.get(selector).first().should('be.visible').click({ waitForAnimations: true, force: true });
+});
+
+/**
+ * @memberOf cy
+ * @method clearAndType
+ * @param {string} selector
+ * @param {string} value
+ * @returns Chainable
+ */
+Cypress.Commands.add('clearAndType', (selector, value) => {
+  cy.get(selector).first().should('be.visible').clear()
+    .type(value);
+});
+
+/**
+ * @memberOf cy
+ * @method validateText
+ * @param {string} selector
+ * @param {string} value
+ * @returns Chainable
+ */
+Cypress.Commands.add('validateText', (selector, value) => {
+  cy.get(selector).should('be.visible').invoke('text').should('equal', value);
+});
+
+/**
+ * @memberOf cy
  * @method clickButton
  * @param {string} label
  * @returns Chainable
  */
-Cypress.Commands.add('clickButton',
-  (label) => {
-    cy.contains(label)
-      .should('exist');
-    cy.get('button')
-      .contains(label)
-      .should('be.visible')
-      .scrollIntoView()
-      .click({ waitForAnimations: true, force: true });
-  });
+Cypress.Commands.add('clickButton', (label) => {
+  cy.contains(label).should('exist');
+  cy.get('button').contains(label).should('be.visible')
+    .scrollIntoView()
+    .click({ waitForAnimations: true, force: true });
+});
 
 /**
  * @memberOf cy
@@ -88,18 +117,14 @@ Cypress.Commands.add('clickButton',
  * @param {string} label
  * @returns Chainable
  */
-Cypress.Commands.add('clickLinkSameWindow',
-  (label) => {
-    cy.contains(label)
-      .should('exist');
-    cy.get('a')
-      .contains(label)
-      .should('be.visible')
-      .scrollIntoView()
-      .invoke('removeAttr', 'target')
-      .invoke('removeAttr', 'onclick')
-      .click({ waitForAnimations: true, force: true });
-  });
+Cypress.Commands.add('clickLinkSameWindow', (label) => {
+  cy.contains(label).should('exist');
+  cy.get('a').contains(label).should('be.visible')
+    .scrollIntoView()
+    .invoke('removeAttr', 'target')
+    .invoke('removeAttr', 'onclick')
+    .click({ waitForAnimations: true, force: true });
+});
 
 /**
  * @memberOf cy
@@ -107,16 +132,12 @@ Cypress.Commands.add('clickLinkSameWindow',
  * @param {string} label
  * @returns Chainable
  */
-Cypress.Commands.add('clickLink',
-  (label) => {
-    cy.contains(label)
-      .should('exist');
-    cy.get('a')
-      .contains(label)
-      .should('exist')
-      .scrollIntoView()
-      .click({ waitForAnimations: true, force: true });
-  });
+Cypress.Commands.add('clickLink', (label) => {
+  cy.contains(label).should('exist');
+  cy.get('a').contains(label).should('exist')
+    .scrollIntoView()
+    .click({ waitForAnimations: true, force: true });
+});
 
 /**
  * @memberOf cy
@@ -124,13 +145,10 @@ Cypress.Commands.add('clickLink',
  * @param {string} label
  * @returns Chainable
  */
-Cypress.Commands.add('clickLinkButton',
-  (label) => {
-    cy.get(`button[aria-label="${label}"]`)
-      .should('exist')
-      .scrollIntoView()
-      .click({ waitForAnimations: true, force: true });
-  });
+Cypress.Commands.add('clickLinkButton', (label) => {
+  cy.get(`button[aria-label="${label}"]`).should('exist')
+    .scrollIntoView().click({ waitForAnimations: true, force: true });
+});
 
 /**
  * @memberOf cy
@@ -138,16 +156,12 @@ Cypress.Commands.add('clickLinkButton',
  * @param {string} label
  * @returns Chainable
  */
-Cypress.Commands.add('clickSpan',
-  (label) => {
-    cy.contains(label)
-      .should('exist');
-    cy.get('span')
-      .contains(label)
-      .should('exist')
-      .scrollIntoView()
-      .click({ waitForAnimations: true, force: true });
-  });
+Cypress.Commands.add('clickSpan', (label) => {
+  cy.contains(label).should('exist');
+  cy.get('span').contains(label).should('exist')
+    .scrollIntoView()
+    .click({ waitForAnimations: true, force: true });
+});
 
 /**
  * @memberOf cy
@@ -157,10 +171,10 @@ Cypress.Commands.add('clickSpan',
  * @returns Chainable
  */
 Cypress.Commands.add('login', (email, password) => {
-  cy.get(elements.emailText).should('be.visible').clear().type(email, { log: true });
-  cy.get(elements.passwordText).should('be.visible').clear().type(password, { sensitive: true });
-  cy.get(elements.loginButton).should('be.enabled').click();
-  cy.get(elements.loginButton).should('not.exist');
+  cy.get(elementStore['Email Text']).should('be.visible').clear().type(email, { log: true });
+  cy.get(elementStore['Password Text']).should('be.visible').clear().type(password, { sensitive: true });
+  cy.get(elementStore['Login Button']).should('be.enabled').click();
+  cy.get(elementStore['Login Button']).should('not.exist');
 });
 
 /**
@@ -176,68 +190,6 @@ Cypress.Commands.add('authenticate', () => {
       headers: { 'content-type': 'application/json' },
       body: { email: `${users.valid.email}`, password: `${users.valid.password}` },
     }).then((response) => response.body.authentication);
-  });
-});
-
-/**
- * @memberOf cy
- * @method cleanupProducts
- * @param {string} basketId
- * @param {string} token
- * @returns Chainable
- */
-Cypress.Commands.add('cleanupProducts', (basketId, token) => {
-  // Get items in basket
-  cy.request({
-    method: 'GET',
-    url: `${Cypress.env('baseURL')}/rest/basket/${basketId}`,
-    headers: { Authorization: `Bearer ${token}` },
-  }).should(({ status, body }) => {
-    expect(status).to.equal(200);
-    const { Products } = body.data;
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < Products.length; i++) {
-      // Delete item
-      cy.request({
-        method: 'DELETE',
-        url: `${Cypress.env('baseURL')}/api/BasketItems/${Products[i].BasketItem.id}`,
-        headers: { Authorization: `Bearer ${token}` },
-        // eslint-disable-next-line no-shadow
-      }).should(({ status, body }) => {
-        expect(status).to.equal(200);
-        expect(body.status).to.equal('success');
-      });
-    }
-  });
-});
-
-/**
- * @memberOf cy
- * @method cleanupAddress
- * @param {string} token
- * @returns Chainable
- */
-Cypress.Commands.add('cleanupAddress', (token) => {
-  // Get all address
-  cy.request({
-    method: 'GET',
-    url: `${Cypress.env('baseURL')}/api/Addresss`,
-    headers: { Authorization: `Bearer ${token}` },
-  }).should(({ status, body }) => {
-    expect(status).to.equal(200);
-    const { data } = body;
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < data.length; i++) {
-      // Delete address
-      cy.request({
-        method: 'DELETE',
-        url: `${Cypress.env('baseURL')}/api/Addresss/${data[i].id}`,
-        headers: { Authorization: `Bearer ${token}` },
-      }).then((response) => {
-        expect(response).property('status').to.equal(200);
-        expect(response.body.status).to.equal('success');
-      });
-    }
   });
 });
 

@@ -18,7 +18,7 @@ describe('Home page display when no product found', () => {
   });
 
   it('Click Search', () => {
-    cy.get(elements.searchButton).first().should('be.visible').click();
+    cy.clickElement(elements.searchButton);
   });
 
   it('Search for Apple', () => {
@@ -27,8 +27,7 @@ describe('Home page display when no product found', () => {
   });
 
   it('Validate search results shows Apple products', () => {
-    cy.get(elements.searchValueText).should('be.visible')
-      .invoke('text').should('equal', 'Apple');
+    cy.validateText(elements.searchValueText, 'Apple');
     cy.get(elements.itemNameText).each(($el) => {
       expect($el.text()).to.include('Apple');
     });

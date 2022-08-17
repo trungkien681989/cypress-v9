@@ -1,3 +1,8 @@
+import AddressUtil from '../../utils/addressUtil';
+import ProductUtil from '../../utils/productUtil';
+
+const addressUtil = new AddressUtil();
+const productUtil = new ProductUtil();
 let bearerToken;
 let basketId;
 let itemId;
@@ -6,10 +11,11 @@ let itemName;
 describe('Add one product', () => {
   before(() => {
     cy.clearLocalStorageCache();
+    productUtil.cleanUpProducts();
+    addressUtil.cleanupAddress();
     cy.authenticate().then((authentication) => {
       bearerToken = authentication.token;
       basketId = authentication.bid;
-      cy.cleanupProducts(basketId, bearerToken);
     });
   });
 
