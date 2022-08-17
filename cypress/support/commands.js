@@ -171,10 +171,10 @@ Cypress.Commands.add('clickSpan', (label) => {
  * @returns Chainable
  */
 Cypress.Commands.add('login', (email, password) => {
-  cy.get(elementStore['Email Text']).should('be.visible').clear().type(email, { log: true });
-  cy.get(elementStore['Password Text']).should('be.visible').clear().type(password, { sensitive: true });
-  cy.get(elementStore['Login Button']).should('be.enabled').click();
-  cy.get(elementStore['Login Button']).should('not.exist');
+  cy.get(elements.emailText).should('be.visible').clear().type(email, { log: true });
+  cy.get(elements.passwordText).should('be.visible').clear().type(password, { sensitive: true });
+  cy.get(elements.loginButton).should('be.enabled').click();
+  cy.get(elements.loginButton).should('not.exist');
 });
 
 /**
