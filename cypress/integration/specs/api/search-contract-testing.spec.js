@@ -56,12 +56,12 @@ describe('Contract testing for /search endpoint', () => {
   });
 
   it('Make GET request to endpoint /products/searches then expect not found response', () => {
-    // The API should return method not allowed 405 instead of 500
+    // The API should return not found 404 instead of 500
     makeRequest('GET', 'rest/products/searches', 500);
   });
 
   it('Make GET request to endpoint /product/search then expect not found response', () => {
-    // The API should return method not allowed 405 instead of 500
+    // The API should return not found 404 instead of 500
     makeRequest('GET', 'rest/product/search?q=', 500);
   });
 });
