@@ -15,6 +15,7 @@ This project presents following tests:
 - Testing UI alternative cases using mock/stub response from API: 
   - `cypress/integration/specs/ui/mock-no-product.spec.js`
   - `cypress/integration/specs/ui/mock-server-error.spec.js`
+- Data driven testing using fixture: `cypress/integration/specs/ui/login.spec.js`
 - Visual UI testing with `Percy/Cypress`: `cypress/integration/specs/ui/search.spec.js`
 
 ## Installation

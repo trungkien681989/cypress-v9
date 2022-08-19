@@ -12,6 +12,13 @@ describe('Buying one product', () => {
     cy.clearLocalStorageCache();
     productUtil.cleanUpProducts();
     addressUtil.cleanupAddress();
+    cy.openOWASPJuiceShop();
+    cy.clickElement(elements.navBarAccountButton);
+    cy.clickElement(elements.navBarLoginButton);
+    cy.url().should('include', '/login');
+    cy.fixture('user').then((users) => {
+      cy.login(users.valid.email, users.valid.password);
+    });
   });
 
   beforeEach(() => {
@@ -20,19 +27,6 @@ describe('Buying one product', () => {
 
   afterEach(() => {
     cy.saveLocalStorageCache();
-  });
-
-  it('Open the OWASP Juice Shop home page', () => {
-    cy.openOWASPJuiceShop();
-  });
-
-  it('Login with valid account', () => {
-    cy.clickElement(elements.navBarAccountButton);
-    cy.clickElement(elements.navBarLoginButton);
-    cy.url().should('include', '/login');
-    cy.fixture('user').then((users) => {
-      cy.login(users.valid.email, users.valid.password);
-    });
   });
 
   it('Add one product to the basket', () => {

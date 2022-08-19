@@ -11,6 +11,7 @@ export const dismissCookieMessage = 'a[aria-label="dismiss cookie message"]';
 export const emailText = 'input#email';
 export const passwordText = 'input#password';
 export const loginButton = 'button#loginButton';
+export const errorMessage = 'div[class*="error"]';
 
 /* HEADER
 ========================================================================= */
