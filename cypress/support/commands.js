@@ -26,8 +26,10 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
+import Ajv from 'ajv';
 import * as elements from './element-store';
 
+const ajv = new Ajv({ allErrors: true });
 let LOCAL_STORAGE_MEMORY = {};
 
 Cypress.Commands.overwrite('type', (originalFn, element, text, options) => {
@@ -190,6 +192,60 @@ Cypress.Commands.add('authenticate', () => {
       headers: { 'content-type': 'application/json' },
       body: { email: `${users.valid.email}`, password: `${users.valid.password}` },
     }).then((response) => response.body.authentication);
+  });
+});
+
+/**
+ * @memberOf cy
+ * @method validateApiSchema
+ * @param {string} method
+ * @param {string} endpoint
+ * @param {string} bearerToken
+ * @param {string} statusCode
+ * @param {string} schema
+ * @returns Chainable
+ */
+Cypress.Commands.add('validateApiSchema', (method, endpoint, bearerToken, statusCode, schema) => {
+  cy.request({
+    method,
+    url: `${Cypress.env('baseURL')}/${endpoint}`,
+    headers: {
+      Authorization: `Bearer ${bearerToken}`,
+    },
+    failOnStatusCode: false,
+  }).should(({ status, body }) => {
+    expect(status).to.equal(statusCode);
+    cy.fixture(`schema/${schema}`).then((schema) => {
+      const validate = ajv.compile(schema);
+      const valid = validate(body);
+      if (!valid) {
+        cy.log(validate.errors).then(() => {
+          throw new Error('Wrong Schema. Please double check recent commits.');
+        });
+      }
+    });
+  });
+});
+
+/**
+ * @memberOf cy
+ * @method makeRequest
+ * @param {string} method
+ * @param {string} endpoint
+ * @param {string} bearerToken
+ * @param {string} statusCode
+ * @returns Chainable
+ */
+Cypress.Commands.add('makeRequest', (method, endpoint, bearerToken, statusCode) => {
+  cy.request({
+    method,
+    url: `${Cypress.env('baseURL')}/${endpoint}`,
+    headers: {
+      Authorization: `Bearer ${bearerToken}`,
+    },
+    failOnStatusCode: false,
+  }).should(({ status, body }) => {
+    expect(status).to.equal(statusCode);
   });
 });
 
