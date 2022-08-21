@@ -27,7 +27,7 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 import Ajv from 'ajv';
-import * as elements from './element-store';
+import { popup, login, allProducts } from './element-store';
 
 const ajv = new Ajv({ allErrors: true });
 let LOCAL_STORAGE_MEMORY = {};
@@ -173,10 +173,10 @@ Cypress.Commands.add('clickSpan', (label) => {
  * @returns Chainable
  */
 Cypress.Commands.add('login', (email, password) => {
-  cy.get(elements.emailText).should('be.visible').clear().type(email, { log: true });
-  cy.get(elements.passwordText).should('be.visible').clear().type(password, { sensitive: true });
-  cy.get(elements.loginButton).should('be.enabled').click();
-  cy.get(elements.loginButton).should('not.exist');
+  cy.get(login.emailInput).should('be.visible').clear().type(email, { log: true });
+  cy.get(login.passwordInput).should('be.visible').clear().type(password, { sensitive: true });
+  cy.get(login.loginButton).should('be.enabled').click();
+  cy.get(login.loginButton).should('not.exist');
 });
 
 /**
@@ -215,8 +215,8 @@ Cypress.Commands.add('validateApiSchema', (method, endpoint, bearerToken, status
     failOnStatusCode: false,
   }).should(({ status, body }) => {
     expect(status).to.equal(statusCode);
-    cy.fixture(`schema/${schema}`).then((schema) => {
-      const validate = ajv.compile(schema);
+    cy.fixture(`schema/${schema}`).then((schemaData) => {
+      const validate = ajv.compile(schemaData);
       const valid = validate(body);
       if (!valid) {
         cy.log(validate.errors).then(() => {
@@ -244,7 +244,7 @@ Cypress.Commands.add('makeRequest', (method, endpoint, bearerToken, statusCode) 
       Authorization: `Bearer ${bearerToken}`,
     },
     failOnStatusCode: false,
-  }).should(({ status, body }) => {
+  }).should(({ status }) => {
     expect(status).to.equal(statusCode);
   });
 });
@@ -257,9 +257,9 @@ Cypress.Commands.add('makeRequest', (method, endpoint, bearerToken, statusCode) 
 Cypress.Commands.add('openOWASPJuiceShop', () => {
   cy.visit(Cypress.env('baseURL'));
   expect(cy.title().should('equal', 'OWASP Juice Shop'));
-  cy.get(elements.closeWelcomeBannerButton).should('be.visible').click();
-  cy.get(elements.dismissCookieMessage).should('be.visible').click();
-  cy.get(elements.itemsPerPage).should('exist');
+  cy.get(popup.closeWelcomeBannerButton).should('be.visible').click();
+  cy.get(popup.dismissCookieMessage).should('be.visible').click();
+  cy.get(allProducts.itemsPerPage).should('exist');
 });
 
 /**

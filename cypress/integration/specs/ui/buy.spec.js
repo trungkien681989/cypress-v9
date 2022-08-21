@@ -1,4 +1,6 @@
-import * as elements from '../../../support/element-store';
+import {
+  header, allProducts, basket, address, newAddress,
+} from '../../../support/element-store';
 import AddressUtil from '../../utils/addressUtil';
 import ProductUtil from '../../utils/productUtil';
 
@@ -13,8 +15,8 @@ describe('Buying one product', () => {
     productUtil.cleanUpProducts();
     addressUtil.cleanupAddress();
     cy.openOWASPJuiceShop();
-    cy.clickElement(elements.navBarAccountButton);
-    cy.clickElement(elements.navBarLoginButton);
+    cy.clickElement(header.navBarAccountButton);
+    cy.clickElement(header.navBarLoginButton);
     cy.url().should('include', '/login');
     cy.fixture('user').then((users) => {
       cy.login(users.valid.email, users.valid.password);
@@ -31,13 +33,13 @@ describe('Buying one product', () => {
 
   it('Add one product to the basket', () => {
     cy.intercept('GET', '**/rest/basket/**').as('basket');
-    cy.get(elements.itemNameText).first().should('be.visible').then(($el) => {
+    cy.get(allProducts.itemNameText).first().should('be.visible').then(($el) => {
       firstProductName = $el.text();
     });
-    cy.get(elements.itemPriceText).first().should('be.visible').then(($el) => {
+    cy.get(allProducts.itemPriceText).first().should('be.visible').then(($el) => {
       firstProductPrice = $el.text();
     });
-    cy.clickElement(elements.addToBasketButton);
+    cy.clickElement(allProducts.addToBasketButton);
     // Wait for first API /basket then validate zero product is in the basket before adding
     productUtil.validateProductNumberFromBackend('@basket', 0);
     // Wait for second API /basket then validate one product is in the basket after adding
@@ -45,23 +47,23 @@ describe('Buying one product', () => {
   });
 
   it('Validate one product that added to the basket has correct info', () => {
-    cy.clickElement(elements.yourBasketButton);
-    cy.get(elements.checkoutButton).first().should('be.visible');
+    cy.clickElement(header.yourBasketButton);
+    cy.get(basket.checkoutButton).first().should('be.visible');
     productUtil.validateProductInfoInBasket(1, firstProductName, 1, firstProductPrice);
   });
 
   it('Checkout products', () => {
-    cy.clickElement(elements.checkoutButton);
+    cy.clickElement(basket.checkoutButton);
   });
 
   it('Add a new address', () => {
-    cy.clickElement(elements.addNewAddressButton);
-    cy.fixture('address').then((address) => {
-      addressUtil.fillAddress(address.country, address.name, address.mobile,
-        address.zip, address.address, address.city, address.state);
+    cy.clickElement(address.addNewAddressButton);
+    cy.fixture('address').then((addressData) => {
+      addressUtil.fillAddress(addressData.country, addressData.name, addressData.mobile,
+        addressData.zip, addressData.address, addressData.city, addressData.state);
     });
     cy.intercept('POST', '**/api/Addresss/**').as('createNewAddress');
-    cy.clickElement(elements.newAddressSubmitButton);
+    cy.clickElement(newAddress.submitButton);
     // Wait for API /Addresss return success after click on Submit
     cy.wait('@createNewAddress').then((interception) => {
       expect(interception.response.statusCode).to.equals(201);
@@ -70,9 +72,9 @@ describe('Buying one product', () => {
   });
 
   it('Validate newly added address has correct info', () => {
-    cy.fixture('address').then((address) => {
-      addressUtil.validateAddressInfo(address.name, address.address, address.city,
-        address.state, address.zip, address.country);
+    cy.fixture('address').then((addressData) => {
+      addressUtil.validateAddressInfo(addressData.name, addressData.address, addressData.city,
+        addressData.state, addressData.zip, addressData.country);
     });
   });
 });

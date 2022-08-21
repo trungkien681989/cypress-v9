@@ -1,11 +1,11 @@
-import * as elements from '../../../support/element-store';
+import { header, login, allProducts } from '../../../support/element-store';
 
 describe('Login validation', () => {
   before(() => {
     cy.clearLocalStorageCache();
     cy.openOWASPJuiceShop();
-    cy.clickElement(elements.navBarAccountButton);
-    cy.clickElement(elements.navBarLoginButton);
+    cy.clickElement(header.navBarAccountButton);
+    cy.clickElement(header.navBarLoginButton);
     cy.url().should('include', '/login');
   });
 
@@ -21,10 +21,10 @@ describe('Login validation', () => {
     cy.fixture('user-invalid').then((users) => {
       // eslint-disable-next-line no-plusplus
       for (let i = 0; i < users.length; i++) {
-        cy.get(elements.emailText).should('be.visible').clear().type(users[i].invalid.email, { log: true });
-        cy.get(elements.passwordText).should('be.visible').clear().type(users[i].invalid.password, { sensitive: true });
-        cy.get(elements.loginButton).should('be.enabled').click();
-        cy.validateText(elements.errorMessage, 'Invalid email or password.');
+        cy.get(login.emailInput).should('be.visible').clear().type(users[i].invalid.email, { log: true });
+        cy.get(login.passwordInput).should('be.visible').clear().type(users[i].invalid.password, { sensitive: true });
+        cy.get(login.loginButton).should('be.enabled').click();
+        cy.validateText(login.errorMessage, 'Invalid email or password.');
       }
     });
   });
@@ -33,6 +33,6 @@ describe('Login validation', () => {
     cy.fixture('user').then((users) => {
       cy.login(users.valid.email, users.valid.password);
     });
-    cy.get(elements.addToBasketButton).first().should('be.visible');
+    cy.get(allProducts.addToBasketButton).first().should('be.visible');
   });
 });

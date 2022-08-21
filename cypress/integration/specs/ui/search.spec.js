@@ -1,4 +1,4 @@
-import * as elements from '../../../support/element-store';
+import { allProducts, header, searchResults } from '../../../support/element-store';
 
 describe('Home page display when no product found', () => {
   before(() => {
@@ -18,23 +18,23 @@ describe('Home page display when no product found', () => {
   });
 
   it('Click Search', () => {
-    cy.clickElement(elements.searchButton);
+    cy.clickElement(header.searchButton);
   });
 
   it('Search for Apple', () => {
-    cy.get(elements.searchInput).first().should('be.visible').click()
+    cy.get(header.searchInput).first().should('be.visible').click()
       .type('Apple{enter}');
   });
 
   it('Validate search results shows Apple products', () => {
-    cy.validateText(elements.searchValueText, 'Apple');
-    cy.get(elements.itemNameText).each(($el) => {
+    cy.validateText(searchResults.searchValueText, 'Apple');
+    cy.get(allProducts.itemNameText).each(($el) => {
       expect($el.text()).to.include('Apple');
     });
   });
 
   it('Validate search results does not show Banana products', () => {
-    cy.get(elements.itemNameText).each(($el) => {
+    cy.get(allProducts.itemNameText).each(($el) => {
       expect($el.text()).not.to.include('Banana');
     });
   });

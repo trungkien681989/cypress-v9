@@ -1,4 +1,4 @@
-import * as elements from '../../../support/element-store';
+import { allProducts } from '../../../support/element-store';
 
 describe('Home page display when no product found', () => {
   before(() => {
@@ -21,8 +21,8 @@ describe('Home page display when no product found', () => {
   });
 
   it('Validate home page display no product', () => {
-    cy.get(elements.itemNameText).should('not.exist');
-    cy.get(elements.itemPriceText).should('not.exist');
-    cy.get(elements.addToBasketButton).should('not.exist');
+    cy.get(allProducts.itemNameText).should('not.exist');
+    cy.get(allProducts.itemPriceText).should('not.exist');
+    cy.get(allProducts.addToBasketButton).should('not.exist');
   });
 });
